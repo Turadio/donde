@@ -297,7 +297,7 @@
     // ===== VARIABLES =====
     let ubicacionGuardada = null;
     
-    // ===== COMPRIMIR FOTO (reduce calidad y tamaño) =====
+    // ===== COMPRIMIR FOTO =====
     function comprimirFoto(file, calidad = 0.5, maxWidth = 800) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -369,7 +369,6 @@
                     return;
                 }
                 
-                // Mostrar mensaje de carga
                 const msgDiv = document.getElementById('mensajeCarga');
                 if (msgDiv) msgDiv.style.display = 'block';
                 
@@ -395,15 +394,10 @@
         btn.textContent = '⏳ Obteniendo ubicación...';
         
         try {
-            // 1. Obtener ubicación GPS
             const ubicacion = await obtenerUbicacion();
-            
             btn.textContent = '📸 Abriendo cámara...';
-            
-            // 2. Tomar y comprimir foto
             const foto = await tomarFoto();
             
-            // 3. Guardar todo
             ubicacionGuardada = {
                 lat: ubicacion.lat,
                 lng: ubicacion.lng,
@@ -412,7 +406,6 @@
                 fechaTexto: new Date().toLocaleString()
             };
             
-            // Intentar guardar en LocalStorage
             try {
                 localStorage.setItem('donde_ubicacion', JSON.stringify(ubicacionGuardada));
                 alert("✅ ¡Auto guardado con éxito!\n📍 Abre la pestaña 'Mi auto' para encontrarlo.");
@@ -424,7 +417,6 @@
                     throw storageError;
                 }
             }
-            
         } catch (error) {
             alert(error);
         } finally {
@@ -444,7 +436,7 @@
         }
     }
     
-    // ===== CARGAR DATOS GUARDADOS =====
+    // ===== CARGAR DATOS =====
     function cargarDatos() {
         const guardado = localStorage.getItem('donde_ubicacion');
         if (guardado) {
@@ -457,14 +449,15 @@
         actualizarUI();
     }
     
-    // ===== ACTUALIZAR INTERFAZ =====
+    // ===== ACTUALIZAR INTERFAZ (con Google Maps) =====
     function actualizarUI() {
         const contenedorPrincipal = document.getElementById('ultimaUbicacion');
         const contenedorUbicacion = document.getElementById('ubicacionGuardada');
         
         if (ubicacionGuardada) {
             const fecha = new Date(ubicacionGuardada.timestamp).toLocaleString();
-            const mapaUrl = `https://www.openstreetmap.org/?mlat=${ubicacionGuardada.lat}&mlon=${ubicacionGuardada.lng}#map=16/${ubicacionGuardada.lat}/${ubicacionGuardada.lng}`;
+            // CAMBIO IMPORTANTE: Ahora usa Google Maps
+            const mapaUrl = `https://www.google.com/maps?q=${ubicacionGuardada.lat},${ubicacionGuardada.lng}`;
             
             contenedorPrincipal.innerHTML = `
                 <div class="ubicacion-card">
@@ -472,7 +465,7 @@
                     <p>📅 ${fecha}</p>
                     ${ubicacionGuardada.foto ? `<img src="${ubicacionGuardada.foto}" class="foto-guardada" alt="Foto referencia">` : '<p>📷 Sin foto de referencia</p>'}
                     <div class="coordenadas">📍 ${ubicacionGuardada.lat.toFixed(6)}, ${ubicacionGuardada.lng.toFixed(6)}</div>
-                    <a href="${mapaUrl}" target="_blank" style="background:#6c91b5; color:white; padding:10px 16px; border-radius:60px; text-decoration:none; display:inline-block; margin-top:8px;">🗺️ Ver en mapa</a>
+                    <a href="${mapaUrl}" target="_blank" style="background:#6c91b5; color:white; padding:10px 16px; border-radius:60px; text-decoration:none; display:inline-block; margin-top:8px;">🗺️ Ver en Google Maps</a>
                 </div>
             `;
             
@@ -482,7 +475,7 @@
                     <p>📅 Guardado el ${fecha}</p>
                     ${ubicacionGuardada.foto ? `<img src="${ubicacionGuardada.foto}" class="foto-guardada" alt="Foto referencia">` : '<p>📷 Sin foto de referencia</p>'}
                     <div class="coordenadas">📍 ${ubicacionGuardada.lat.toFixed(6)}, ${ubicacionGuardada.lng.toFixed(6)}</div>
-                    <a href="${mapaUrl}" target="_blank" style="background:#6c91b5; color:white; padding:12px 20px; border-radius:60px; text-decoration:none; display:inline-block; margin:8px 0;">🗺️ Abrir en mapa</a>
+                    <a href="${mapaUrl}" target="_blank" style="background:#6c91b5; color:white; padding:12px 20px; border-radius:60px; text-decoration:none; display:inline-block; margin:8px 0;">🗺️ Abrir en Google Maps</a>
                     <p class="distancia">💡 Consejo: Toma una foto del número de columna o letrero para orientarte mejor.</p>
                 </div>
             `;
